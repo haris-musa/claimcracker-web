@@ -23,18 +23,32 @@ export async function POST(request: Request) {
 
     try {
       // First validate with ClaimBuster
-      await validateClaim(text);
+      await validateClaim(text); // This will throw if validation fails
+
+      // If we get here, ClaimBuster validation passed
+      console.log("ClaimBuster validation passed, sending to model...");
 
       // Then send to model for prediction
       const response = await fetch(`${process.env.MODEL_API_URL}/predict`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify({ text }),
       });
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to get prediction");
+        console.error("Model API error:", {
+          status: response.status,
+          statusText: response.statusText,
+          data,
+        });
+        throw new Error(
+          data.error ||
+            `Model prediction failed: ${response.status} ${response.statusText}`
+        );
       }
 
       const prediction = await response.json();

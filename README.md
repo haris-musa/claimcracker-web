@@ -61,15 +61,6 @@ src/
 └── lib/             # Utility functions and configs
 ```
 
-## Environment Variables
-
-Create a `.env.local` file in the root directory with:
-
-```env
-# Backend API URL
-NEXT_PUBLIC_API_URL=http://localhost:10000
-```
-
 ## Learn More
 
 To learn more about the technologies used:
