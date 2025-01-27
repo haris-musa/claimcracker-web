@@ -22,7 +22,15 @@ export async function POST(request: Request) {
     }
 
     try {
+      // Log environment check
+      console.log("Environment check:", {
+        hasModelUrl: !!process.env.MODEL_API_URL,
+        hasClaimBusterUrl: !!process.env.CLAIMBUSTER_API_URL,
+        hasClaimBusterKey: !!process.env.CLAIMBUSTER_API_KEY,
+      });
+
       // First validate with ClaimBuster
+      console.log("Starting ClaimBuster validation...");
       await validateClaim(text); // This will throw if validation fails
 
       // If we get here, ClaimBuster validation passed
@@ -44,6 +52,7 @@ export async function POST(request: Request) {
           status: response.status,
           statusText: response.statusText,
           data,
+          modelUrl: process.env.MODEL_API_URL,
         });
         throw new Error(
           data.error ||
@@ -53,14 +62,27 @@ export async function POST(request: Request) {
 
       const prediction = await response.json();
       return NextResponse.json(prediction);
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof ValidationError) {
+        console.log("ClaimBuster validation error:", error.message);
         return NextResponse.json({ error: error.message }, { status: 400 });
       }
+
+      const err = error as Error;
+      console.error("Detailed error:", {
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+      });
       throw error;
     }
-  } catch (error) {
-    console.error("API error:", error);
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error("API error:", {
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+    });
     return NextResponse.json(
       { error: "Failed to process request" },
       { status: 500 }
