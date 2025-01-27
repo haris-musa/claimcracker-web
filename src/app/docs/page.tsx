@@ -27,7 +27,7 @@ export default function DocsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-md bg-muted p-4">
-              <code>https://api.claimcracker.site</code>
+              <code>https://harismusa-claimcracker.hf.space</code>
             </div>
             <p>
               All endpoints are rate-limited to protect the API. Headers

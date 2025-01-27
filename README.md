@@ -52,23 +52,6 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Project Structure
-
-```
-src/
-├── app/              # Next.js app router pages
-├── components/       # React components
-└── lib/             # Utility functions and configs
-```
-
-## Learn More
-
-To learn more about the technologies used:
-
-- [Next.js Documentation](https://nextjs.org/docs) - Next.js features and API
-- [React Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components) - Server-first UI
-- [Backend API Documentation](http://localhost:10000/docs) - ClaimCracker API reference
-
 ## Deployment
 
 The application is deployed on [Vercel](https://vercel.com). Each push to the main branch triggers an automatic deployment.

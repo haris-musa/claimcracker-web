@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -82,13 +82,23 @@ export default function CheckPage() {
   const [url, setUrl] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  // Use useEffect for error clearing to avoid hydration issues
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (error) {
+      timeoutId = setTimeout(() => setError(null), 5000);
+    }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [error]);
+
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
     setResult(null);
 
     try {
-      // Frontend validation
       const validationError = validateInput(text);
       if (validationError) {
         throw new Error(validationError);
@@ -99,9 +109,6 @@ export default function CheckPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : "An error occurred";
       setError(message);
-
-      // Clear the error after 5 seconds
-      setTimeout(() => setError(null), 5000);
     } finally {
       setLoading(false);
     }
@@ -139,9 +146,6 @@ export default function CheckPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : "An error occurred";
       setError(message);
-
-      // Clear the error after 5 seconds
-      setTimeout(() => setError(null), 5000);
     } finally {
       setLoading(false);
     }
@@ -176,9 +180,6 @@ export default function CheckPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : "An error occurred";
       setError(message);
-
-      // Clear the error after 5 seconds
-      setTimeout(() => setError(null), 5000);
     } finally {
       setLoading(false);
     }
@@ -298,7 +299,11 @@ export default function CheckPage() {
           </Card>
 
           {error && (
-            <Alert variant="destructive" className="mx-4 sm:mx-0">
+            <Alert
+              variant="destructive"
+              className="mx-4 sm:mx-0"
+              key={`error-${Date.now()}`}
+            >
               <XCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription className="text-sm sm:text-base">
