@@ -73,6 +73,10 @@ function validateInput(text: string): string | null {
   return null;
 }
 
+// Route segment config for Next.js
+export const preferredRegion = "auto";
+export const revalidate = 0;
+
 export default function CheckPage() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);

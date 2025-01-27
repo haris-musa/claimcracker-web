@@ -5,7 +5,7 @@ import { Providers } from "@/components/providers";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { Footer } from "@/components/layout/footer";
 
-// Optimize font loading
+// font loading
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
@@ -35,6 +35,9 @@ export const metadata: Metadata = {
     title: "ClaimCracker - Fake News Detection",
     description: "Modern AI-powered fake news detection system",
     type: "website",
+    url: "https://claimcracker.site",
+    locale: "en_US",
+    siteName: "ClaimCracker",
   },
 };
 

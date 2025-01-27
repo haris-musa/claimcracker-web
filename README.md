@@ -1,13 +1,12 @@
 # ClaimCracker Frontend
 
-Modern web interface for the ClaimCracker fake news detection system. Built with Next.js 15 and React Server Components.
+Modern web interface for the ClaimCracker fake news detection system. Built with Next.js 15.
 
 ## Features
 
 - **Modern UI/UX**
 
   - Server-side rendering with Next.js 15
-  - React Server Components for optimal performance
   - Responsive design for all devices
   - Dark/light mode support
 
@@ -15,7 +14,6 @@ Modern web interface for the ClaimCracker fake news detection system. Built with
 
   - Optimized font loading
   - SEO-friendly metadata
-  - OpenGraph social sharing
   - Structured data for search engines
 
 - **Developer Experience**

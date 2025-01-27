@@ -81,7 +81,7 @@ export default function DocsPage() {
 
             <div className="space-y-2">
               <p className="font-medium">Rate Limit:</p>
-              <p>20 requests per minute</p>
+              <p>30 requests per minute</p>
             </div>
           </CardContent>
         </Card>
