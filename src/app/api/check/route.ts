@@ -10,6 +10,28 @@ if (!process.env.CLAIMBUSTER_API_URL || !process.env.CLAIMBUSTER_API_KEY) {
   throw new Error("ClaimBuster API configuration is missing");
 }
 
+// Helper function to fetch with timeout
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeout = 8000
+) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const { text } = await request.json();
@@ -27,6 +49,7 @@ export async function POST(request: Request) {
         hasModelUrl: !!process.env.MODEL_API_URL,
         hasClaimBusterUrl: !!process.env.CLAIMBUSTER_API_URL,
         hasClaimBusterKey: !!process.env.CLAIMBUSTER_API_KEY,
+        modelUrl: process.env.MODEL_API_URL, // Log the actual URL
       });
 
       // First validate with ClaimBuster
@@ -36,32 +59,55 @@ export async function POST(request: Request) {
       // If we get here, ClaimBuster validation passed
       console.log("ClaimBuster validation passed, sending to model...");
 
-      // Then send to model for prediction
-      const response = await fetch(`${process.env.MODEL_API_URL}/predict`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ text }),
-      });
+      // Then send to model for prediction with timeout
+      try {
+        const response = await fetchWithTimeout(
+          `${process.env.MODEL_API_URL}/predict`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ text }),
+          }
+        );
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        console.error("Model API error:", {
-          status: response.status,
-          statusText: response.statusText,
-          data,
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          console.error("Model API error:", {
+            status: response.status,
+            statusText: response.statusText,
+            data,
+            modelUrl: process.env.MODEL_API_URL,
+          });
+          return NextResponse.json(
+            {
+              error: `Model prediction failed: ${response.status} ${response.statusText}`,
+            },
+            { status: response.status }
+          );
+        }
+
+        const prediction = await response.json();
+        return NextResponse.json(prediction);
+      } catch (fetchError: unknown) {
+        const err = fetchError as Error;
+        console.error("Model fetch error:", {
+          name: err.name,
+          message: err.message,
           modelUrl: process.env.MODEL_API_URL,
         });
-        throw new Error(
-          data.error ||
-            `Model prediction failed: ${response.status} ${response.statusText}`
+        return NextResponse.json(
+          {
+            error:
+              err.name === "AbortError"
+                ? "Model API timeout"
+                : "Failed to connect to model API",
+          },
+          { status: 503 }
         );
       }
-
-      const prediction = await response.json();
-      return NextResponse.json(prediction);
     } catch (error: unknown) {
       if (error instanceof ValidationError) {
         console.log("ClaimBuster validation error:", error.message);
