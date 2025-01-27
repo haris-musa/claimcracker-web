@@ -42,40 +42,28 @@ export async function validateClaim(text: string): Promise<boolean> {
     throw new Error("ClaimBuster API configuration is missing");
   }
 
-  try {
-    validateInput(text);
-
-    const response = await fetch(
-      `${process.env.CLAIMBUSTER_API_URL}/score/text/${encodeURIComponent(
-        text
-      )}`,
-      {
-        method: "GET",
-        headers: {
-          "x-api-key": process.env.CLAIMBUSTER_API_KEY,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to validate claim");
+  const response = await fetch(
+    `${process.env.CLAIMBUSTER_API_URL}/score/text/${encodeURIComponent(text)}`,
+    {
+      method: "GET",
+      headers: {
+        "x-api-key": process.env.CLAIMBUSTER_API_KEY,
+      },
     }
+  );
 
-    const data: ClaimBusterResponse = await response.json();
-    const isValid = data.results.some((result) => result.score > 0.5);
-
-    if (!isValid) {
-      throw new ValidationError(
-        "This doesn't appear to be a checkable claim. Please provide a statement that makes a specific claim or assertion."
-      );
-    }
-
-    return true;
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      throw error;
-    }
-    console.error("ClaimBuster validation error:", error);
-    throw new Error("Unable to validate claim. Please try again.");
+  if (!response.ok) {
+    throw new ValidationError("Unable to validate claim. Please try again.");
   }
+
+  const data: ClaimBusterResponse = await response.json();
+  const isValid = data.results.some((result) => result.score > 0.5);
+
+  if (!isValid) {
+    throw new ValidationError(
+      "This doesn't appear to be a checkable claim. Please provide a statement that makes a specific claim or assertion."
+    );
+  }
+
+  return true;
 }
