@@ -1,18 +1,28 @@
 import { NextResponse } from "next/server";
 import { SUPPORTED_FILE_TYPES, MAX_FILE_SIZE } from "@/lib/extract";
-import pdf from "pdf-parse";
 import mammoth from "mammoth";
-
-async function extractPDF(file: File): Promise<string> {
-  const buffer = await file.arrayBuffer();
-  const data = await pdf(Buffer.from(buffer));
-  return data.text;
-}
+import pdfParse from "pdf-parse-fork";
 
 async function extractWord(file: File): Promise<string> {
-  const buffer = await file.arrayBuffer();
-  const result = await mammoth.extractRawText({ arrayBuffer: buffer });
-  return result.value;
+  try {
+    const buffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+    return result.value || "";
+  } catch (error) {
+    console.error("Word extraction error:", error);
+    throw new Error("Failed to extract text from Word document");
+  }
+}
+
+async function extractPDF(file: File): Promise<string> {
+  try {
+    const buffer = await file.arrayBuffer();
+    const data = await pdfParse(Buffer.from(buffer));
+    return data.text || "";
+  } catch (error) {
+    console.error("PDF extraction error:", error);
+    throw new Error("Failed to extract text from PDF");
+  }
 }
 
 export async function POST(request: Request) {
@@ -52,25 +62,25 @@ export async function POST(request: Request) {
       // Handle different file types
       if (file.type === "text/plain") {
         text = await file.text();
-      } else if (file.type === "application/pdf") {
-        text = await extractPDF(file);
       } else if (
         file.type === "application/msword" ||
         file.type ===
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       ) {
         text = await extractWord(file);
+      } else if (file.type === "application/pdf") {
+        text = await extractPDF(file);
       } else {
         throw new Error("Unsupported file type");
       }
 
       // Clean up extracted text
-      text = text
+      const cleanedText = text
         .replace(/\s+/g, " ") // Replace multiple spaces with single space
         .replace(/[\r\n]+/g, " ") // Replace newlines with space
         .trim(); // Remove leading/trailing whitespace
 
-      return NextResponse.json({ text });
+      return NextResponse.json({ text: cleanedText });
     } catch (error) {
       console.error("Content extraction error:", error);
       return NextResponse.json(

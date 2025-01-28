@@ -3,9 +3,9 @@ import { ValidationError } from "./claimbuster";
 // Supported file types
 export const SUPPORTED_FILE_TYPES = [
   "text/plain",
-  "application/pdf",
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/pdf",
 ];
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -34,7 +34,7 @@ export async function extractFromFile(file: File): Promise<string> {
   // Validate file type
   if (!SUPPORTED_FILE_TYPES.includes(file.type)) {
     throw new ValidationError(
-      "Unsupported file type. Please upload a text, PDF, or Word document."
+      "Unsupported file type. Please upload a text or Word document."
     );
   }
 

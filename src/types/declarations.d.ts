@@ -29,3 +29,24 @@ declare module "mammoth" {
     extractRawText,
   };
 }
+
+declare module "pdf-parse-fork" {
+  interface PDFData {
+    text: string;
+    numpages: number;
+    info: {
+      PDFFormatVersion: string;
+      IsAcroFormPresent: boolean;
+      IsXFAPresent: boolean;
+      [key: string]: string | number | boolean | null;
+    };
+    metadata: {
+      [key: string]: string | number | boolean | null;
+    };
+    version: string;
+  }
+
+  function pdfParse(dataBuffer: Buffer | ArrayBuffer): Promise<PDFData>;
+
+  export = pdfParse;
+}
