@@ -7,6 +7,7 @@ const nextConfig = {
     };
     return config;
   },
+  serverExternalPackages: ["mammoth"],
 };
 
 export default nextConfig;

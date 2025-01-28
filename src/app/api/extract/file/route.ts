@@ -6,7 +6,9 @@ import pdfParse from "pdf-parse-fork";
 async function extractWord(file: File): Promise<string> {
   try {
     const buffer = await file.arrayBuffer();
-    const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+    const result = await mammoth.extractRawText({
+      buffer: Buffer.from(buffer),
+    });
     return result.value || "";
   } catch (error) {
     console.error("Word extraction error:", error);
